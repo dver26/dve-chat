@@ -1,32 +1,26 @@
+import { createSupabaseServerClient } from '~/utils/supabase.server'
+import { json } from '@remix-run/node'
+import type { LoaderArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import Login from '~/components/Login'
+
+// hace el loading de datos en el servidor
+export const loader = async ({ request }: LoaderArgs) => {
+  const response = new Response()
+  const supabase = createSupabaseServerClient({ request, response })
+  const { data } = await supabase.from('messages').select()
+
+  return json({ messages: data ?? [] }, { headers: response.headers })
+}
+
 export default function Index() {
+  const { messages } = useLoaderData<typeof loader>()
+
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
-    </div>
-  );
+    <main>
+      <h1>miduchat</h1>
+      <Login />
+      <pre>{JSON.stringify(messages, null, 2)}</pre>
+    </main>
+  )
 }
